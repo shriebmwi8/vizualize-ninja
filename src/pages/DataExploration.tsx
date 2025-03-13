@@ -1,26 +1,24 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import DataSummary from '@/components/DataSummary';
-import { getMockDataSummary } from '@/lib/api';
+import { getDataSummary } from '@/lib/api';
+import { toast } from 'sonner';
 
 const DataExploration: React.FC = () => {
   const [dataSummary, setDataSummary] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API call
     const loadSummary = async () => {
       setIsLoading(true);
       try {
-        // In a real app, this would be an API call
-        setTimeout(() => {
-          const summary = getMockDataSummary();
-          setDataSummary(summary);
-          setIsLoading(false);
-        }, 1000);
+        // Get data summary from the backend
+        const summary = await getDataSummary();
+        setDataSummary(summary);
       } catch (error) {
         console.error('Error loading summary:', error);
+        toast.error('Error loading data summary. Please check if the server is running.');
+      } finally {
         setIsLoading(false);
       }
     };

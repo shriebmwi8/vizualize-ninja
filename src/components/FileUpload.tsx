@@ -3,12 +3,12 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Upload, X, File } from 'lucide-react';
-import { uploadFile } from '@/lib/api';
+import { uploadFile, getDataPreview } from '@/lib/api';
 import LoadingSpinner from './LoadingSpinner';
 import { toast } from 'sonner';
 
 interface FileUploadProps {
-  onFileUploaded: () => void;
+  onFileUploaded: (data: any) => void;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
@@ -61,13 +61,16 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
     
     setIsUploading(true);
     try {
-      // In a real app, this would send to your backend
+      // Upload file to backend
       await uploadFile(file);
       toast.success('File uploaded successfully');
-      onFileUploaded();
+      
+      // Get the preview data
+      const previewData = await getDataPreview();
+      onFileUploaded(previewData);
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Error uploading file. Please try again.');
+      toast.error('Error uploading file. Please check if the server is running.');
     } finally {
       setIsUploading(false);
     }

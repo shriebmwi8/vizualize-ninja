@@ -23,13 +23,20 @@ const PreprocessingOptions: React.FC<PreprocessingOptionsProps> = ({
   const handleProcess = async () => {
     setIsProcessing(true);
     try {
-      // In a real app, this would send to your backend
-      await processData(selectedOption);
+      // Map frontend options to backend options (1, 2, 3)
+      const optionMap: Record<string, string> = {
+        'mean': '1',
+        'median': '2',
+        'drop': '3'
+      };
+      
+      // Process data with selected option
+      await processData(optionMap[selectedOption]);
       toast.success('Data processed successfully');
       onProcessingComplete();
     } catch (error) {
       console.error('Processing error:', error);
-      toast.error('Error processing data. Please try again.');
+      toast.error('Error processing data. Please check if the server is running.');
     } finally {
       setIsProcessing(false);
     }

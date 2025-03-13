@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
@@ -6,7 +5,7 @@ import FileUpload from '@/components/FileUpload';
 import DataPreview from '@/components/DataPreview';
 import PreprocessingOptions from '@/components/PreprocessingOptions';
 import Navbar from '@/components/Navbar';
-import { downloadCleanedData, getMockDataPreview } from '@/lib/api';
+import { downloadCleanedData } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
 const Home: React.FC = () => {
@@ -16,13 +15,10 @@ const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleFileUploaded = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setDataPreview(getMockDataPreview());
-      setFileUploaded(true);
-      setIsLoading(false);
-    }, 1000);
+  const handleFileUploaded = (previewData: any) => {
+    setDataPreview(previewData);
+    setFileUploaded(true);
+    setIsLoading(false);
   };
 
   const handleProcessingComplete = () => {
@@ -40,7 +36,7 @@ const Home: React.FC = () => {
       console.error('Download error:', error);
       toast({
         title: "Error",
-        description: "Failed to download the cleaned data",
+        description: "Failed to download the cleaned data. Please check if the server is running.",
         variant: "destructive",
       });
     }

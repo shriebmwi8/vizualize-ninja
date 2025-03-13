@@ -1,7 +1,7 @@
-
 import axios from 'axios';
 
 // This would normally be an environment variable
+// Update this to your actual Flask backend URL
 const API_URL = 'http://localhost:5000';
 
 const api = axios.create({
@@ -11,48 +11,104 @@ const api = axios.create({
   },
 });
 
+// Upload CSV file
 export const uploadFile = async (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
-  const response = await api.post('/upload', formData);
-  return response.data;
+  try {
+    const response = await api.post('/upload', formData);
+    return response.data;
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    throw error;
+  }
 };
 
+// Get data preview (first 5 rows)
 export const getDataPreview = async () => {
-  const response = await api.get('/preview');
-  return response.data;
+  try {
+    const response = await api.get('/preview');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting data preview:', error);
+    throw error;
+  }
 };
 
+// Process data with selected preprocessing option
 export const processData = async (option: string) => {
-  const response = await api.post('/process', { option });
-  return response.data;
+  try {
+    const response = await api.post('/process', { option });
+    return response.data;
+  } catch (error) {
+    console.error('Error processing data:', error);
+    throw error;
+  }
 };
 
+// Get data summary statistics
 export const getDataSummary = async () => {
-  const response = await api.get('/summary');
-  return response.data;
+  try {
+    const response = await api.get('/summary');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting data summary:', error);
+    throw error;
+  }
 };
 
+// Get generated visualizations
 export const getVisualizations = async () => {
-  const response = await api.get('/visualizations');
-  return response.data;
+  try {
+    const response = await api.get('/visualizations');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting visualizations:', error);
+    throw error;
+  }
 };
 
+// Download cleaned dataset
 export const downloadCleanedData = async () => {
-  const response = await api.get('/download', {
-    responseType: 'blob',
-  });
-  
-  const url = window.URL.createObjectURL(new Blob([response.data]));
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', 'cleaned_data.csv');
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+  try {
+    const response = await api.get('/download', {
+      responseType: 'blob',
+    });
+    
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'cleaned_data.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (error) {
+    console.error('Error downloading cleaned data:', error);
+    throw error;
+  }
 };
 
-// For development/demo purposes - mocked data
+// Download visualization images
+export const downloadVisualization = async (visualizationType: string) => {
+  try {
+    const response = await api.get(`/download-visualization/${visualizationType}`, {
+      responseType: 'blob',
+    });
+    
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${visualizationType}.png`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (error) {
+    console.error('Error downloading visualization:', error);
+    throw error;
+  }
+};
+
+// For development/demo purposes - mocked data, will be replaced with actual API calls
 export const getMockDataPreview = () => {
   return {
     columns: ['id', 'name', 'age', 'city', 'salary'],

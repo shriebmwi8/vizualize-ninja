@@ -1,9 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
+import { downloadVisualization } from '@/lib/api';
 import LoadingSpinner from './LoadingSpinner';
+import { toast } from 'sonner';
 
 interface VisualizationGalleryProps {
   visualizations: Record<string, string> | null;
@@ -14,14 +15,14 @@ const VisualizationGallery: React.FC<VisualizationGalleryProps> = ({
   visualizations, 
   isLoading 
 }) => {
-  const downloadImage = (imageUrl: string, imageName: string) => {
-    // Create a link element, set the download attribute, and click it
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.download = `${imageName}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadImage = async (visualizationType: string) => {
+    try {
+      await downloadVisualization(visualizationType);
+      toast.success(`${visualizationType} downloaded successfully`);
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error(`Error downloading ${visualizationType}`);
+    }
   };
 
   if (isLoading) {
@@ -53,8 +54,8 @@ const VisualizationGallery: React.FC<VisualizationGalleryProps> = ({
   }
 
   const visualizationItems = [
-    { key: 'heatmap', title: 'Correlation Heatmap', description: 'Visualizes the correlation between numerical variables' },
-    { key: 'histogram', title: 'Histograms', description: 'Shows the distribution of numerical variables' },
+    { key: 'correlation_heatmap', title: 'Correlation Heatmap', description: 'Visualizes the correlation between numerical variables' },
+    { key: 'histograms', title: 'Histograms', description: 'Shows the distribution of numerical variables' },
     { key: 'pairplot', title: 'Pairplot', description: 'Displays relationships between multiple variables' },
     { key: 'boxplot', title: 'Boxplot', description: 'Shows statistical distribution of numerical variables' },
   ];
@@ -86,7 +87,7 @@ const VisualizationGallery: React.FC<VisualizationGalleryProps> = ({
                     variant="secondary"
                     size="sm"
                     className="absolute bottom-2 right-2 bg-white/80 hover:bg-white"
-                    onClick={() => downloadImage(visualizations[item.key], item.key)}
+                    onClick={() => handleDownloadImage(item.key)}
                   >
                     <Download className="h-4 w-4 mr-1" />
                     Download

@@ -1,26 +1,24 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import VisualizationGallery from '@/components/VisualizationGallery';
-import { getMockVisualizations } from '@/lib/api';
+import { getVisualizations } from '@/lib/api';
+import { toast } from 'sonner';
 
 const Visualizations: React.FC = () => {
   const [visualizations, setVisualizations] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API call
     const loadVisualizations = async () => {
       setIsLoading(true);
       try {
-        // In a real app, this would be an API call
-        setTimeout(() => {
-          const visData = getMockVisualizations();
-          setVisualizations(visData);
-          setIsLoading(false);
-        }, 1000);
+        // Get visualizations from the backend
+        const visData = await getVisualizations();
+        setVisualizations(visData);
       } catch (error) {
         console.error('Error loading visualizations:', error);
+        toast.error('Error loading visualizations. Please check if the server is running.');
+      } finally {
         setIsLoading(false);
       }
     };
