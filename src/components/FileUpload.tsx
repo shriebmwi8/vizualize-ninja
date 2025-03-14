@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Upload, X, File } from 'lucide-react';
+import { Upload, X, File, FileType } from 'lucide-react';
 import { uploadFile, getDataPreview } from '@/lib/api';
 import LoadingSpinner from './LoadingSpinner';
 import { toast } from 'sonner';
@@ -84,12 +84,12 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full overflow-hidden border-0 shadow-lg">
       <CardContent className="p-6">
         <div 
-          className={`border-2 border-dashed rounded-lg p-6 text-center ${
-            isDragging ? 'border-vizNinja-purple bg-vizNinja-lightPurple' : 'border-gray-300'
-          } transition-colors duration-200 cursor-pointer`}
+          className={`border-2 border-dashed rounded-xl p-8 text-center ${
+            isDragging ? 'border-vizNinja-purple bg-vizNinja-lightPurple/50' : 'border-gray-200 hover:border-vizNinja-purple hover:bg-vizNinja-lightPurple/20'
+          } transition-all duration-300 cursor-pointer`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -103,59 +103,69 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
             ref={fileInputRef}
           />
           
-          <div className="flex flex-col items-center justify-center py-4">
-            <Upload 
-              className="h-12 w-12 text-vizNinja-purple mb-2" 
-              strokeWidth={1.5} 
-            />
-            <h3 className="text-lg font-semibold mb-2">Upload your CSV file</h3>
-            <p className="text-sm text-gray-500 mb-2">
-              Drag and drop or click to browse
+          <div className="flex flex-col items-center justify-center py-6">
+            <div className="bg-vizNinja-lightPurple p-4 rounded-full mb-4">
+              <Upload 
+                className="h-10 w-10 text-vizNinja-purple" 
+                strokeWidth={1.5} 
+              />
+            </div>
+            <h3 className="text-xl font-semibold mb-3 text-gray-800">Upload your CSV file</h3>
+            <p className="text-gray-500 mb-2">
+              Drag and drop your file here or click to browse
             </p>
-            <p className="text-xs text-gray-400">
-              (Maximum file size: 10MB)
+            <p className="text-xs text-gray-400 flex items-center gap-1">
+              <FileType className="h-3 w-3" />
+              Supported format: CSV (Maximum: 10MB)
             </p>
           </div>
         </div>
 
         {file && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-center justify-between">
-            <div className="flex items-center">
-              <File className="h-5 w-5 text-vizNinja-purple mr-2" />
-              <span className="text-sm font-medium truncate max-w-[200px] md:max-w-xs">
-                {file.name}
-              </span>
-              <span className="text-xs text-gray-500 ml-2">
-                ({(file.size / 1024).toFixed(2)} KB)
-              </span>
+          <div className="mt-4 p-4 bg-gray-50 rounded-lg flex items-center justify-between border border-gray-100">
+            <div className="flex items-center overflow-hidden">
+              <div className="bg-blue-100 p-2 rounded-md mr-3">
+                <File className="h-5 w-5 text-blue-600" />
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-sm font-medium truncate max-w-[200px] md:max-w-xs text-gray-700">
+                  {file.name}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {(file.size / 1024).toFixed(2)} KB
+                </p>
+              </div>
             </div>
-            <div className="flex items-center">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemoveFile();
-                }}
-                className="h-8 w-8 rounded-full"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemoveFile();
+              }}
+              className="h-8 w-8 rounded-full hover:bg-red-50 hover:text-red-500"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         )}
 
         <Button
-          className="w-full mt-4 bg-vizNinja-purple hover:bg-vizNinja-purple/90"
+          className="w-full mt-6 bg-gradient-to-r from-vizNinja-purple to-vizNinja-purple/90 hover:opacity-90 transition-opacity"
           disabled={!file || isUploading}
           onClick={handleUpload}
         >
           {isUploading ? (
-            <LoadingSpinner className="mr-2" size={16} />
+            <>
+              <LoadingSpinner className="mr-2" size={18} />
+              <span>Uploading...</span>
+            </>
           ) : (
-            <Upload className="mr-2 h-4 w-4" />
+            <>
+              <Upload className="mr-2 h-5 w-5" />
+              <span>Upload & Analyze</span>
+            </>
           )}
-          {isUploading ? 'Uploading...' : 'Upload & Analyze'}
         </Button>
       </CardContent>
     </Card>

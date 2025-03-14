@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { processData } from '@/lib/api';
 import LoadingSpinner from './LoadingSpinner';
 import { toast } from 'sonner';
+import { Wand2, Activity, Trash2 } from 'lucide-react';
 
 interface PreprocessingOptionsProps {
   onProcessingComplete: () => void;
@@ -36,53 +37,73 @@ const PreprocessingOptions: React.FC<PreprocessingOptionsProps> = ({
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Preprocessing Options</CardTitle>
-        <CardDescription>
+    <Card className="w-full border-0 shadow-lg overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-vizNinja-lightTeal to-vizNinja-lightPurple/50 pb-6">
+        <CardTitle className="text-xl text-gray-800">Preprocessing Options</CardTitle>
+        <CardDescription className="text-gray-600">
           Choose how to handle missing values in your dataset
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         <RadioGroup 
           value={selectedOption} 
           onValueChange={setSelectedOption}
-          className="flex flex-col space-y-3"
+          className="flex flex-col space-y-4"
         >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="1" id="mean" disabled={disabled} />
-            <Label htmlFor="mean" className={disabled ? "text-gray-400" : ""}>
-              Fill with mean (numeric) / mode (categorical)
-            </Label>
+          <div className={`flex items-center space-x-3 p-3 rounded-lg ${selectedOption === '1' ? 'bg-vizNinja-lightPurple/30' : 'hover:bg-gray-50'} transition-colors`}>
+            <RadioGroupItem value="1" id="mean" disabled={disabled} className={selectedOption === '1' ? 'text-vizNinja-purple' : ''} />
+            <div className="flex items-center">
+              <Wand2 className={`mr-2 h-5 w-5 ${selectedOption === '1' ? 'text-vizNinja-purple' : 'text-gray-400'}`} />
+              <Label htmlFor="mean" className={`${disabled ? "text-gray-400" : selectedOption === '1' ? "text-gray-800 font-medium" : "text-gray-600"}`}>
+                Fill with mean (numeric) / mode (categorical)
+              </Label>
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="2" id="median" disabled={disabled} />
-            <Label htmlFor="median" className={disabled ? "text-gray-400" : ""}>
-              Fill with median (numeric) / mode (categorical)
-            </Label>
+          
+          <div className={`flex items-center space-x-3 p-3 rounded-lg ${selectedOption === '2' ? 'bg-vizNinja-lightTeal/30' : 'hover:bg-gray-50'} transition-colors`}>
+            <RadioGroupItem value="2" id="median" disabled={disabled} className={selectedOption === '2' ? 'text-vizNinja-teal' : ''} />
+            <div className="flex items-center">
+              <Activity className={`mr-2 h-5 w-5 ${selectedOption === '2' ? 'text-vizNinja-teal' : 'text-gray-400'}`} />
+              <Label htmlFor="median" className={`${disabled ? "text-gray-400" : selectedOption === '2' ? "text-gray-800 font-medium" : "text-gray-600"}`}>
+                Fill with median (numeric) / mode (categorical)
+              </Label>
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="3" id="drop" disabled={disabled} />
-            <Label htmlFor="drop" className={disabled ? "text-gray-400" : ""}>
-              Drop rows with missing values
-            </Label>
+          
+          <div className={`flex items-center space-x-3 p-3 rounded-lg ${selectedOption === '3' ? 'bg-red-50' : 'hover:bg-gray-50'} transition-colors`}>
+            <RadioGroupItem value="3" id="drop" disabled={disabled} className={selectedOption === '3' ? 'text-red-500' : ''} />
+            <div className="flex items-center">
+              <Trash2 className={`mr-2 h-5 w-5 ${selectedOption === '3' ? 'text-red-500' : 'text-gray-400'}`} />
+              <Label htmlFor="drop" className={`${disabled ? "text-gray-400" : selectedOption === '3' ? "text-gray-800 font-medium" : "text-gray-600"}`}>
+                Drop rows with missing values
+              </Label>
+            </div>
           </div>
         </RadioGroup>
 
         <Button
-          className="w-full mt-6 bg-vizNinja-teal hover:bg-vizNinja-teal/90"
+          className={`w-full mt-8 ${disabled ? 'bg-gray-300' : 'bg-gradient-to-r from-vizNinja-teal to-blue-500'} hover:opacity-90 text-white shadow-md hover:shadow-lg transition-all`}
           onClick={handleProcess}
           disabled={disabled || isProcessing}
         >
           {isProcessing ? (
             <>
-              <LoadingSpinner className="mr-2" size={16} />
+              <LoadingSpinner className="mr-2" size={18} />
               Processing...
             </>
           ) : (
-            'Process Data'
+            <>
+              {selectedOption === '3' ? <Trash2 className="mr-2 h-5 w-5" /> : <Wand2 className="mr-2 h-5 w-5" />}
+              Process Data
+            </>
           )}
         </Button>
+        
+        {disabled && (
+          <p className="text-center text-gray-500 text-sm mt-4">
+            Please upload a CSV file first
+          </p>
+        )}
       </CardContent>
     </Card>
   );
