@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, BarChart4, HeatMap, LineChart, BoxSelect, Image } from 'lucide-react';
+import { Download, BarChart4, Grid, LineChart, BoxSelect, Image } from 'lucide-react';
 import { downloadVisualization } from '@/lib/api';
 import LoadingSpinner from './LoadingSpinner';
 import { toast } from 'sonner';
@@ -56,7 +56,7 @@ const VisualizationGallery: React.FC<VisualizationGalleryProps> = ({
       key: 'correlation_heatmap', 
       title: 'Correlation Heatmap', 
       description: 'Visualizes the correlation between numerical variables',
-      icon: <HeatMap className="h-5 w-5 text-red-500" />
+      icon: <Grid className="h-5 w-5 text-red-500" />
     },
     { 
       key: 'histograms', 

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { FileUpload, BarChart3, Database } from 'lucide-react';
+import { Upload, BarChart3, Database } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
@@ -22,7 +22,7 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <div className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow">
               <div className="bg-vizNinja-lightPurple p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <FileUpload className="h-8 w-8 text-vizNinja-purple" />
+                <Upload className="h-8 w-8 text-vizNinja-purple" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Upload Data</h3>
               <p className="text-gray-500">
