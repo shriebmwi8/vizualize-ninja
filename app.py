@@ -86,27 +86,35 @@ def process_data():
     # Handle missing values based on user choice
     if option == 'mean_mode':
         # Fill numeric with mean and categorical with mode
-        df.fillna(df.mean(numeric_only=True), inplace=True)
-        for col in df.select_dtypes(include=['object']).columns:
+        numeric_cols = df.select_dtypes(include=[np.number]).columns
+        for col in numeric_cols:
+            df[col] = df[col].fillna(df[col].mean())
+            
+        categorical_cols = df.select_dtypes(include=['object']).columns
+        for col in categorical_cols:
             if not df[col].empty and df[col].mode().size > 0:
-                df[col].fillna(df[col].mode()[0], inplace=True)
+                df[col] = df[col].fillna(df[col].mode()[0])
     
     elif option == 'median_mode':
         # Fill numeric with median and categorical with mode
-        df.fillna(df.median(numeric_only=True), inplace=True)
-        for col in df.select_dtypes(include=['object']).columns:
+        numeric_cols = df.select_dtypes(include=[np.number]).columns
+        for col in numeric_cols:
+            df[col] = df[col].fillna(df[col].median())
+            
+        categorical_cols = df.select_dtypes(include=['object']).columns
+        for col in categorical_cols:
             if not df[col].empty and df[col].mode().size > 0:
-                df[col].fillna(df[col].mode()[0], inplace=True)
+                df[col] = df[col].fillna(df[col].mode()[0])
     
     elif option == 'drop':
         # Drop rows with missing values
-        df.dropna(inplace=True)
+        df = df.dropna()
     
     # Remove duplicates
-    df.drop_duplicates(inplace=True)
+    df = df.drop_duplicates()
     
     # Standardize column names
-    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_', regex=True)
     
     # Store the cleaned dataframe
     cleaned_df = df
@@ -254,5 +262,76 @@ def download_visualization(vis_type):
         download_name=f'{vis_type}.png'
     )
 
+# Fix issue with PreprocessingOptions.tsx component
+@app.route('/process', methods=['POST'])
+def handle_process():
+    global global_df, cleaned_df
+    
+    if global_df is None:
+        return jsonify({'error': 'No data uploaded yet'}), 400
+    
+    # Get the option from request
+    data = request.json
+    option = data.get('option')
+    
+    # Map frontend options to backend options
+    option_map = {
+        '1': 'mean_mode',
+        '2': 'median_mode',
+        '3': 'drop'
+    }
+    
+    # Make a copy of the dataframe to avoid modifying the original
+    df = global_df.copy()
+    
+    # Process based on mapped option
+    actual_option = option_map.get(option, 'mean_mode')
+    
+    # Handle missing values based on user choice
+    if actual_option == 'mean_mode':
+        # Fill numeric with mean and categorical with mode
+        numeric_cols = df.select_dtypes(include=[np.number]).columns
+        for col in numeric_cols:
+            df[col] = df[col].fillna(df[col].mean())
+            
+        categorical_cols = df.select_dtypes(include=['object']).columns
+        for col in categorical_cols:
+            if not df[col].empty and df[col].mode().size > 0:
+                df[col] = df[col].fillna(df[col].mode()[0])
+    
+    elif actual_option == 'median_mode':
+        # Fill numeric with median and categorical with mode
+        numeric_cols = df.select_dtypes(include=[np.number]).columns
+        for col in numeric_cols:
+            df[col] = df[col].fillna(df[col].median())
+            
+        categorical_cols = df.select_dtypes(include=['object']).columns
+        for col in categorical_cols:
+            if not df[col].empty and df[col].mode().size > 0:
+                df[col] = df[col].fillna(df[col].mode()[0])
+    
+    elif actual_option == 'drop':
+        # Drop rows with missing values
+        df = df.dropna()
+    
+    # Remove duplicates
+    df = df.drop_duplicates()
+    
+    # Standardize column names
+    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_', regex=True)
+    
+    # Store the cleaned dataframe
+    cleaned_df = df
+    
+    # Generate visualizations
+    generate_visualizations(df)
+    
+    return jsonify({'message': 'Data processed successfully'}), 200
+
+# Update the root route to handle health check
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({"status": "API is running"}), 200
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')

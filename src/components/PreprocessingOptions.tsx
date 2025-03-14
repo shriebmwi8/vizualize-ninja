@@ -17,21 +17,14 @@ const PreprocessingOptions: React.FC<PreprocessingOptionsProps> = ({
   onProcessingComplete,
   disabled = false
 }) => {
-  const [selectedOption, setSelectedOption] = useState('mean');
+  const [selectedOption, setSelectedOption] = useState('1'); // Default to mean/mode
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleProcess = async () => {
     setIsProcessing(true);
     try {
-      // Map frontend options to backend options (1, 2, 3)
-      const optionMap: Record<string, string> = {
-        'mean': '1',
-        'median': '2',
-        'drop': '3'
-      };
-      
       // Process data with selected option
-      await processData(optionMap[selectedOption]);
+      await processData(selectedOption);
       toast.success('Data processed successfully');
       onProcessingComplete();
     } catch (error) {
@@ -57,19 +50,19 @@ const PreprocessingOptions: React.FC<PreprocessingOptionsProps> = ({
           className="flex flex-col space-y-3"
         >
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="mean" id="mean" disabled={disabled} />
+            <RadioGroupItem value="1" id="mean" disabled={disabled} />
             <Label htmlFor="mean" className={disabled ? "text-gray-400" : ""}>
               Fill with mean (numeric) / mode (categorical)
             </Label>
           </div>
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="median" id="median" disabled={disabled} />
+            <RadioGroupItem value="2" id="median" disabled={disabled} />
             <Label htmlFor="median" className={disabled ? "text-gray-400" : ""}>
               Fill with median (numeric) / mode (categorical)
             </Label>
           </div>
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="drop" id="drop" disabled={disabled} />
+            <RadioGroupItem value="3" id="drop" disabled={disabled} />
             <Label htmlFor="drop" className={disabled ? "text-gray-400" : ""}>
               Drop rows with missing values
             </Label>
