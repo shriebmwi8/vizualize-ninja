@@ -12,7 +12,7 @@ const ConnectionStatus: React.FC = () => {
       const connected = await checkServerConnection();
       setIsConnected(connected);
       if (!connected) {
-        toast.error('Cannot connect to the backend server. Make sure it\'s running on http://localhost:5000');
+        toast.error('Cannot connect to the backend server. Make sure it\'s running on http://localhost:5000 and has the proper API endpoints configured.');
       }
     } catch (error) {
       console.error('Error checking connection:', error);
@@ -33,11 +33,14 @@ const ConnectionStatus: React.FC = () => {
   }
   
   return (
-    <div className={`fixed bottom-4 right-4 p-2 rounded-full ${isConnected ? 'bg-green-100' : 'bg-red-100'}`}>
+    <div className={`fixed bottom-4 right-4 p-3 rounded-full ${isConnected ? 'bg-green-100' : 'bg-red-100'} shadow-md z-50 flex items-center justify-center transition-all duration-300`}>
       {isConnected ? (
         <Wifi className="h-5 w-5 text-green-600" />
       ) : (
-        <WifiOff className="h-5 w-5 text-red-600" />
+        <div className="flex items-center">
+          <WifiOff className="h-5 w-5 text-red-600" />
+          <span className="text-xs ml-2 text-red-600 hidden md:inline">Backend not connected</span>
+        </div>
       )}
     </div>
   );
