@@ -38,7 +38,7 @@ const RegressionAnalysis: React.FC = () => {
     setTargetVariable(target);
     
     try {
-      const results = await runRegression(sessionId, target);
+      const results = await runRegression(target);
       setRegressionResults(results);
       toast.success('Regression analysis completed successfully');
     } catch (error) {

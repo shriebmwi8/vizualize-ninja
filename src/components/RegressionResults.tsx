@@ -19,7 +19,7 @@ const RegressionResults: React.FC<RegressionResultsProps> = ({
 }) => {
   const handleDownloadReport = async () => {
     try {
-      await downloadReport(sessionId);
+      await downloadReport();
       toast.success('Report downloaded successfully');
     } catch (error) {
       console.error('Download error:', error);
@@ -29,7 +29,7 @@ const RegressionResults: React.FC<RegressionResultsProps> = ({
 
   const handleDownloadResults = async () => {
     try {
-      await downloadResults(sessionId);
+      await downloadResults();
       toast.success('Results downloaded successfully');
     } catch (error) {
       console.error('Download error:', error);

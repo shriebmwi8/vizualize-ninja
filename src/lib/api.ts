@@ -134,7 +134,8 @@ export const getVisualizations = async (): Promise<any> => {
     return {
       correlation_heatmap: `data:image/png;base64,${visualizations.correlation_heatmap}`,
       histograms: `data:image/png;base64,${visualizations.histograms}`,
-      boxplots: `data:image/png;base64,${visualizations.boxplots}`
+      boxplot: `data:image/png;base64,${visualizations.boxplots}`,
+      pairplot: `data:image/png;base64,${visualizations.pairplot || ''}` // Added for compatibility
     };
   } catch (error) {
     console.error('Error getting visualizations:', error);
@@ -218,6 +219,37 @@ export const downloadResults = async (): Promise<void> => {
   } catch (error) {
     console.error('Error downloading results:', error);
     handleApiError(error, 'Error downloading results');
+    throw error;
+  }
+};
+
+// Download visualization
+export const downloadVisualization = async (visualizationType: string): Promise<void> => {
+  try {
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+      throw new Error('No session ID found. Please upload a file first.');
+    }
+    
+    // The backend doesn't have a direct endpoint for individual visualization downloads,
+    // so we'll use a workaround to get the image from localStorage and download it
+    const visualizations = JSON.parse(localStorage.getItem('visualizations') || '{}');
+    const base64Data = visualizations[visualizationType];
+    
+    if (!base64Data) {
+      throw new Error(`Visualization ${visualizationType} not found`);
+    }
+    
+    // Create a download link for the image
+    const link = document.createElement('a');
+    link.href = `data:image/png;base64,${base64Data}`;
+    link.download = `${visualizationType}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error('Error downloading visualization:', error);
+    handleApiError(error, 'Error downloading visualization');
     throw error;
   }
 };
