@@ -1,295 +1,221 @@
 
-// Mock data for frontend-only application
+import axios from 'axios';
 
-// Sample data for session
-const mockSessionId = "123e4567-e89b-12d3-a456-426614174000";
+// Base URL for the backend API
+const API_BASE_URL = 'http://localhost:5000/api';
 
-// Initial file upload response data
-const mockUploadResponse = {
-  session_id: mockSessionId,
-  stats: {
-    rows: 150,
-    columns: 5,
-    column_names: ["Age", "Income", "Spending", "Savings", "Credit Score"],
-    missing_values: {
-      "Age": 2,
-      "Income": 5,
-      "Spending": 3,
-      "Savings": 8,
-      "Credit Score": 4
-    },
-    data_types: {
-      "Age": "int64",
-      "Income": "int64",
-      "Spending": "int64",
-      "Savings": "int64",
-      "Credit Score": "int64"
-    },
-    sample_data: [
-      {"Age": 34, "Income": 65000, "Spending": 48000, "Savings": 17000, "Credit Score": 720},
-      {"Age": 29, "Income": 48000, "Spending": 40000, "Savings": 8000, "Credit Score": 680},
-      {"Age": 45, "Income": 89000, "Spending": 60000, "Savings": 29000, "Credit Score": 790},
-      {"Age": 38, "Income": 72000, "Spending": 52000, "Savings": 20000, "Credit Score": 750},
-      {"Age": 52, "Income": 120000, "Spending": 85000, "Savings": 35000, "Credit Score": 820}
-    ]
-  },
-  numeric_features: ["Age", "Income", "Spending", "Savings", "Credit Score"],
-  categorical_features: []
-};
-
-// Sample data preview from uploaded file
-const mockDataPreview = {
-  columns: ["Age", "Income", "Spending", "Savings", "Credit Score"],
-  data: [
-    [34, 65000, 48000, 17000, 720],
-    [29, 48000, 40000, 8000, 680],
-    [45, 89000, 60000, 29000, 790],
-    [38, 72000, 52000, 20000, 750],
-    [52, 120000, 85000, 35000, 820]
-  ]
-};
-
-// Mock data summary
-const mockDataSummary = {
-  shape: { rows: 150, columns: 5 },
-  missingValues: {
-    "Age": 2,
-    "Income": 5,
-    "Spending": 3,
-    "Savings": 8,
-    "Credit Score": 4
-  },
-  uniqueValues: {
-    "Age": 42,
-    "Income": 112,
-    "Spending": 98,
-    "Savings": 84,
-    "Credit Score": 45
-  },
-  dataTypes: {
-    "Age": "int64",
-    "Income": "int64",
-    "Spending": "int64",
-    "Savings": "int64",
-    "Credit Score": "int64"
-  },
-  statistics: {
-    "Age": { mean: 37.5, median: 36.0, min: 22.0, max: 68.0, std: 10.2 },
-    "Income": { mean: 72400, median: 68500, min: 32000, max: 150000, std: 25300 },
-    "Spending": { mean: 55300, median: 52800, min: 28000, max: 120000, std: 18700 },
-    "Savings": { mean: 17100, median: 15600, min: 0, max: 50000, std: 12400 },
-    "Credit Score": { mean: 732, median: 740, min: 580, max: 850, std: 65 }
-  }
-};
-
-// Mock preprocessing response
-const mockPreprocessingResponse = {
-  message: "Data preprocessing completed",
-  rows_after_preprocessing: 148,
-  visualizations: {
-    correlation_heatmap: "https://via.placeholder.com/600x500?text=Correlation+Heatmap",
-    histograms: "https://via.placeholder.com/600x500?text=Histograms",
-    boxplots: "https://via.placeholder.com/600x500?text=Boxplots"
-  }
-};
-
-// Mock visualization data
-const mockVisualizations = {
-  correlation_heatmap: "https://via.placeholder.com/600x500?text=Correlation+Heatmap",
-  histograms: "https://via.placeholder.com/600x500?text=Histograms",
-  boxplots: "https://via.placeholder.com/600x500?text=Boxplots"
-};
-
-// Mock regression results
-const mockRegressionResults = {
-  model_results: {
-    mse: 4235.67,
-    r2: 0.87,
-    num_features: 4,
-    num_samples: 150,
-    test_size: 30
-  },
-  regression_plot: "https://via.placeholder.com/600x500?text=Regression+Results",
-  feature_importance: {
-    data: [
-      { Feature: "Income", Importance: 0.65 },
-      { Feature: "Age", Importance: 0.42 },
-      { Feature: "Credit Score", Importance: 0.38 },
-      { Feature: "Spending", Importance: 0.31 }
-    ],
-    image: "https://via.placeholder.com/600x500?text=Feature+Importance"
-  }
-};
-
-// Mock implementation of uploadFile
+// Upload file to backend
 export const uploadFile = async (file: File): Promise<any> => {
-  return new Promise((resolve) => {
-    // Simulate network request
-    console.log('File uploaded:', file.name);
-    setTimeout(() => {
-      resolve(mockUploadResponse);
-    }, 1500);
-  });
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    throw error;
+  }
 };
 
-// Mock implementation of getDataPreview
+// Get data preview
 export const getDataPreview = async (): Promise<any> => {
-  return new Promise((resolve) => {
-    // Simulate network request
-    setTimeout(() => {
-      resolve(mockDataPreview);
-    }, 1000);
-  });
+  try {
+    // For this function, we'll rely on the sample_data returned from the upload endpoint
+    // Assuming the sessionId is stored in localStorage after upload
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+      throw new Error('No session ID found. Please upload a file first.');
+    }
+    
+    // Create a structure matching what the frontend expects
+    return {
+      columns: JSON.parse(localStorage.getItem('columnNames') || '[]'),
+      data: JSON.parse(localStorage.getItem('sampleData') || '[]')
+    };
+  } catch (error) {
+    console.error('Error getting data preview:', error);
+    throw error;
+  }
 };
 
-// Mock implementation of processData
+// Process data
 export const processData = async (option: string): Promise<any> => {
-  return new Promise((resolve) => {
-    // Simulate network request
-    console.log('Processing data with option:', option);
-    setTimeout(() => {
-      resolve(mockPreprocessingResponse);
-    }, 2000);
-  });
+  try {
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+      throw new Error('No session ID found. Please upload a file first.');
+    }
+    
+    // Convert string option to numeric as expected by backend
+    let missingValueStrategy;
+    switch (option) {
+      case '1': missingValueStrategy = 1; break; // mean/mode
+      case '2': missingValueStrategy = 2; break; // median/mode
+      case '3': missingValueStrategy = 3; break; // drop rows
+      default: missingValueStrategy = 1;
+    }
+    
+    const response = await axios.post(`${API_BASE_URL}/preprocess`, {
+      session_id: sessionId,
+      missing_value_strategy: missingValueStrategy
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error processing data:', error);
+    throw error;
+  }
 };
 
-// Mock implementation of getDataSummary
+// Get data summary
 export const getDataSummary = async (): Promise<any> => {
-  return new Promise((resolve) => {
-    // Simulate network request
-    setTimeout(() => {
-      resolve(mockDataSummary);
-    }, 1500);
-  });
+  try {
+    // Since there's no direct endpoint for data summary in the backend,
+    // we'll use the data stored in localStorage from the upload response
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+      throw new Error('No session ID found. Please upload a file first.');
+    }
+    
+    const stats = JSON.parse(localStorage.getItem('stats') || '{}');
+    
+    // Transform the data to match the frontend's expected format
+    return {
+      shape: { rows: stats.rows || 0, columns: stats.columns || 0 },
+      missingValues: stats.missing_values || {},
+      uniqueValues: {}, // This data isn't provided by the backend
+      dataTypes: stats.data_types || {},
+      statistics: {} // This data isn't provided directly by the backend
+    };
+  } catch (error) {
+    console.error('Error getting data summary:', error);
+    throw error;
+  }
 };
 
-// Mock implementation of getVisualizations
+// Get visualizations
 export const getVisualizations = async (): Promise<any> => {
-  return new Promise((resolve) => {
-    // Simulate network request
-    setTimeout(() => {
-      resolve(mockVisualizations);
-    }, 1800);
-  });
+  try {
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+      throw new Error('No session ID found. Please upload a file first.');
+    }
+    
+    // Use the visualizations data returned from processData
+    const visualizations = JSON.parse(localStorage.getItem('visualizations') || '{}');
+    
+    // Transform from base64 to URLs
+    return {
+      correlation_heatmap: `data:image/png;base64,${visualizations.correlation_heatmap}`,
+      histograms: `data:image/png;base64,${visualizations.histograms}`,
+      boxplots: `data:image/png;base64,${visualizations.boxplots}`
+    };
+  } catch (error) {
+    console.error('Error getting visualizations:', error);
+    throw error;
+  }
 };
 
-// Mock implementation of runRegression
+// Run regression
 export const runRegression = async (sessionId: string, targetVariable: string): Promise<any> => {
-  return new Promise((resolve) => {
-    // Simulate network request
-    console.log(`Running regression with session ${sessionId} and target ${targetVariable}`);
-    setTimeout(() => {
-      resolve(mockRegressionResults);
-    }, 2500);
-  });
+  try {
+    const response = await axios.post(`${API_BASE_URL}/run_regression`, {
+      session_id: sessionId,
+      target_variable: targetVariable
+    });
+    
+    const data = response.data;
+    
+    // Transform base64 images to URL format expected by frontend
+    return {
+      model_results: data.model_results,
+      regression_plot: `data:image/png;base64,${data.regression_plot}`,
+      feature_importance: data.feature_importance ? {
+        data: data.feature_importance.data,
+        image: `data:image/png;base64,${data.feature_importance.image}`
+      } : null
+    };
+  } catch (error) {
+    console.error('Error running regression:', error);
+    throw error;
+  }
 };
 
-// Mock implementation of downloadCleanedData
+// Download cleaned data
 export const downloadCleanedData = async (): Promise<void> => {
-  return new Promise((resolve) => {
-    // Simulate download
-    setTimeout(() => {
-      console.log('Cleaned data downloaded');
-      
-      // Create a fake CSV file and trigger download
-      const csvContent = "Age,Income,Spending,Savings,Credit Score\n34,65000,48000,17000,720\n29,48000,40000,8000,680";
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.setAttribute('hidden', '');
-      a.setAttribute('href', url);
-      a.setAttribute('download', 'cleaned_data.csv');
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      
-      resolve();
-    }, 1000);
-  });
+  try {
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+      throw new Error('No session ID found. Please upload a file first.');
+    }
+    
+    window.open(`${API_BASE_URL}/download/${sessionId}?type=data`, '_blank');
+  } catch (error) {
+    console.error('Error downloading cleaned data:', error);
+    throw error;
+  }
 };
 
-// Mock implementation of downloadReport
+// Download report
 export const downloadReport = async (sessionId: string): Promise<void> => {
-  return new Promise((resolve) => {
-    // Simulate download
-    setTimeout(() => {
-      console.log('Analysis report downloaded for session:', sessionId);
-      
-      // Create a fake HTML file and trigger download
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Data Analysis Report</title>
-            <style>
-                body { font-family: Arial, sans-serif; }
-            </style>
-        </head>
-        <body>
-            <h1>Data Analysis Report</h1>
-            <p>Session ID: ${sessionId}</p>
-            <p>This is a placeholder for a full HTML report</p>
-        </body>
-        </html>
-      `;
-      
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.setAttribute('hidden', '');
-      a.setAttribute('href', url);
-      a.setAttribute('download', `analysis_report_${sessionId}.html`);
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      
-      resolve();
-    }, 1000);
-  });
+  try {
+    window.open(`${API_BASE_URL}/generate_report/${sessionId}`, '_blank');
+  } catch (error) {
+    console.error('Error downloading report:', error);
+    throw error;
+  }
 };
 
-// Mock implementation of downloadResults
+// Download results
 export const downloadResults = async (sessionId: string): Promise<void> => {
-  return new Promise((resolve) => {
-    // Simulate download
-    setTimeout(() => {
-      console.log('Analysis results downloaded for session:', sessionId);
-      
-      // Create a fake text file (since we can't create a real ZIP in browser)
-      const textContent = `This is a placeholder for the analysis results ZIP file.\nSession ID: ${sessionId}`;
-      const blob = new Blob([textContent], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.setAttribute('hidden', '');
-      a.setAttribute('href', url);
-      a.setAttribute('download', `analysis_results_${sessionId}.txt`);
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      
-      resolve();
-    }, 1000);
-  });
+  try {
+    window.open(`${API_BASE_URL}/download/${sessionId}?type=results`, '_blank');
+  } catch (error) {
+    console.error('Error downloading results:', error);
+    throw error;
+  }
 };
 
-// Mock implementation of downloadVisualization
+// Download visualization - not directly supported by backend
 export const downloadVisualization = async (visualizationType: string): Promise<void> => {
-  return new Promise((resolve) => {
-    // Simulate download
-    setTimeout(() => {
-      console.log('Downloading visualization:', visualizationType);
-      
-      // Create a fake image download from the placeholder
-      const imageUrl = mockVisualizations[visualizationType as keyof typeof mockVisualizations];
-      const a = document.createElement('a');
-      a.setAttribute('hidden', '');
-      a.setAttribute('href', imageUrl);
-      a.setAttribute('download', `${visualizationType}.png`);
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      
-      resolve();
-    }, 1000);
-  });
+  try {
+    const visualizations = JSON.parse(localStorage.getItem('visualizations') || '{}');
+    const base64Data = visualizations[visualizationType];
+    
+    if (!base64Data) {
+      throw new Error(`Visualization ${visualizationType} not found`);
+    }
+    
+    // Create a link to download the base64 image
+    const link = document.createElement('a');
+    link.href = `data:image/png;base64,${base64Data}`;
+    link.download = `${visualizationType}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error('Error downloading visualization:', error);
+    throw error;
+  }
+};
+
+// Update FileUpload.tsx to save session data to localStorage
+export const updateLocalStorage = (data: any) => {
+  localStorage.setItem('sessionId', data.session_id);
+  localStorage.setItem('stats', JSON.stringify(data.stats));
+  localStorage.setItem('columnNames', JSON.stringify(data.stats.column_names));
+  localStorage.setItem('sampleData', JSON.stringify(data.stats.sample_data));
+  localStorage.setItem('numericFeatures', JSON.stringify(data.numeric_features));
+  localStorage.setItem('categoricalFeatures', JSON.stringify(data.categorical_features));
+};
+
+// Update for after data processing to save visualizations
+export const updateVisualizationsStorage = (data: any) => {
+  localStorage.setItem('visualizations', JSON.stringify(data.visualizations));
 };

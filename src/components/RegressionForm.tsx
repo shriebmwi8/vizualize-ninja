@@ -10,13 +10,20 @@ import LoadingSpinner from './LoadingSpinner';
 interface RegressionFormProps {
   onRunRegression: (targetVariable: string) => void;
   isLoading: boolean;
+  availableFeatures?: string[];
 }
 
-const RegressionForm: React.FC<RegressionFormProps> = ({ onRunRegression, isLoading }) => {
+const RegressionForm: React.FC<RegressionFormProps> = ({ 
+  onRunRegression, 
+  isLoading,
+  availableFeatures = []
+}) => {
   const [targetVariable, setTargetVariable] = useState<string>('');
   
-  // Mock numeric features available for regression
-  const availableFeatures = ["Age", "Income", "Spending", "Savings", "Credit Score"];
+  // Use provided features or fallback to default if empty
+  const features = availableFeatures.length > 0 
+    ? availableFeatures 
+    : ["Age", "Income", "Spending", "Savings", "Credit Score"];
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +51,7 @@ const RegressionForm: React.FC<RegressionFormProps> = ({ onRunRegression, isLoad
                 <SelectValue placeholder="Select a variable to predict" />
               </SelectTrigger>
               <SelectContent>
-                {availableFeatures.map((feature) => (
+                {features.map((feature) => (
                   <SelectItem key={feature} value={feature}>
                     {feature}
                   </SelectItem>

@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Upload, X, File, FileType } from 'lucide-react';
-import { uploadFile, getDataPreview } from '@/lib/api';
+import { uploadFile, updateLocalStorage } from '@/lib/api';
 import LoadingSpinner from './LoadingSpinner';
 import { toast } from 'sonner';
 
@@ -62,11 +62,20 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
     setIsUploading(true);
     try {
       // Upload file to backend
-      await uploadFile(file);
+      const response = await uploadFile(file);
       toast.success('File uploaded successfully');
       
-      // Get the preview data
-      const previewData = await getDataPreview();
+      // Save session data to localStorage
+      updateLocalStorage(response);
+      
+      // Prepare data preview in the format expected by the component
+      const previewData = {
+        columns: response.stats.column_names,
+        data: response.stats.sample_data.map((row: any) => 
+          Object.values(row)
+        )
+      };
+      
       onFileUploaded(previewData);
     } catch (error) {
       console.error('Upload error:', error);

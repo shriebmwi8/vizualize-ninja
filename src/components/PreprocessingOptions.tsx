@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { processData } from '@/lib/api';
+import { processData, updateVisualizationsStorage } from '@/lib/api';
 import LoadingSpinner from './LoadingSpinner';
 import { toast } from 'sonner';
 import { Wand2, Activity, Trash2 } from 'lucide-react';
@@ -25,7 +25,11 @@ const PreprocessingOptions: React.FC<PreprocessingOptionsProps> = ({
     setIsProcessing(true);
     try {
       // Process data with selected option
-      await processData(selectedOption);
+      const response = await processData(selectedOption);
+      
+      // Save visualizations to localStorage
+      updateVisualizationsStorage(response);
+      
       toast.success('Data processed successfully');
       onProcessingComplete();
     } catch (error) {

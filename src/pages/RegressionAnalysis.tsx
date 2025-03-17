@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import RegressionForm from '@/components/RegressionForm';
 import RegressionResults from '@/components/RegressionResults';
@@ -8,12 +8,32 @@ import { toast } from 'sonner';
 import { BarChart, TrendingUp, LineChart } from 'lucide-react';
 
 const RegressionAnalysis: React.FC = () => {
-  const [sessionId, setSessionId] = useState<string>('123e4567-e89b-12d3-a456-426614174000');
+  const [sessionId, setSessionId] = useState<string>('');
   const [targetVariable, setTargetVariable] = useState<string>('');
   const [regressionResults, setRegressionResults] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [numericFeatures, setNumericFeatures] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Get sessionId from localStorage
+    const storedSessionId = localStorage.getItem('sessionId');
+    if (storedSessionId) {
+      setSessionId(storedSessionId);
+    }
+    
+    // Get numeric features from localStorage
+    const storedNumericFeatures = localStorage.getItem('numericFeatures');
+    if (storedNumericFeatures) {
+      setNumericFeatures(JSON.parse(storedNumericFeatures));
+    }
+  }, []);
 
   const handleRunRegression = async (target: string) => {
+    if (!sessionId) {
+      toast.error('No session found. Please upload and process a file first.');
+      return;
+    }
+    
     setIsLoading(true);
     setTargetVariable(target);
     
@@ -54,7 +74,11 @@ const RegressionAnalysis: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-1 gap-8 mb-8">
             <div className="bg-white p-6 rounded-xl shadow-md transform transition-all hover:shadow-lg">
-              <RegressionForm onRunRegression={handleRunRegression} isLoading={isLoading} />
+              <RegressionForm 
+                onRunRegression={handleRunRegression} 
+                isLoading={isLoading}
+                availableFeatures={numericFeatures}
+              />
             </div>
           </div>
           
