@@ -1,59 +1,33 @@
 
-# Data Visualization & Exploration Tool
+# VizNinja Data Explorer - Frontend Demo
 
-This application allows you to upload CSV files, clean your data, generate visualizations, and download the processed data.
+This is a frontend-only demonstration of the VizNinja Data Explorer application. It uses mock data to showcase the UI and user experience without requiring a backend server.
 
-## Setup Instructions
+## Features
 
-### Backend (Flask)
+- Upload data files (simulated)
+- Data preprocessing options
+- Data exploration and visualization
+- Interactive visualizations gallery
+- Data summary statistics
 
-1. Create a virtual environment:
-   ```
-   python -m venv venv
-   ```
+## Getting Started
 
-2. Activate the virtual environment:
-   - Windows: `venv\Scripts\activate`
-   - Mac/Linux: `source venv/bin/activate`
+1. Clone the repository
+2. Install dependencies with `npm install` or `yarn install`
+3. Start the development server with `npm run dev` or `yarn dev`
+4. Open your browser to the URL shown in the terminal (typically http://localhost:5173/)
 
-3. Install the required dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
+## Notes
 
-4. Run the Flask backend:
-   ```
-   python app.py
-   ```
-   The backend will run on http://localhost:5000
+This is a frontend-only version using simulated data. In a production environment, these features would connect to a backend API for real data processing and analysis.
 
-### Frontend (React)
+## Technologies Used
 
-1. Install the required dependencies:
-   ```
-   npm install
-   ```
-
-2. Run the React frontend:
-   ```
-   npm run dev
-   ```
-   The frontend will run on http://localhost:5173
-
-## How to Use
-
-1. Upload a CSV file using the upload interface.
-2. Preview your data in the table.
-3. Choose a preprocessing option to handle missing values.
-4. Explore the data summary and visualizations generated.
-5. Download the cleaned dataset or any of the visualizations.
-
-## API Endpoints
-
-- `POST /upload`: Upload a CSV file
-- `GET /preview`: Get a preview of the uploaded data
-- `POST /process`: Process the data with selected preprocessing option
-- `GET /summary`: Get summary statistics of the data
-- `GET /visualizations`: Get links to generated visualizations
-- `GET /download`: Download the cleaned dataset
-- `GET /download-visualization/<vis_type>`: Download a specific visualization
+- React
+- TypeScript
+- TailwindCSS
+- shadcn/ui components
+- React Router
+- React Query
+- Recharts
