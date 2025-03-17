@@ -1,8 +1,20 @@
 
 import axios from 'axios';
+import { toast } from 'sonner';
 
-// Base URL for the backend API
+// Base URL for the backend API - Make sure this matches your backend server
 const API_BASE_URL = 'http://localhost:5000/api';
+
+// Check server connection
+export const checkServerConnection = async (): Promise<boolean> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/health`, { timeout: 5000 });
+    return response.status === 200;
+  } catch (error) {
+    console.error('Backend server connection failed:', error);
+    return false;
+  }
+};
 
 // Upload file to backend
 export const uploadFile = async (file: File): Promise<any> => {
@@ -16,9 +28,13 @@ export const uploadFile = async (file: File): Promise<any> => {
       },
     });
     
+    // Save session data to localStorage
+    updateLocalStorage(response.data);
+    
     return response.data;
   } catch (error) {
     console.error('Error uploading file:', error);
+    handleApiError(error, 'Error uploading file');
     throw error;
   }
 };
@@ -26,20 +42,20 @@ export const uploadFile = async (file: File): Promise<any> => {
 // Get data preview
 export const getDataPreview = async (): Promise<any> => {
   try {
-    // For this function, we'll rely on the sample_data returned from the upload endpoint
-    // Assuming the sessionId is stored in localStorage after upload
     const sessionId = localStorage.getItem('sessionId');
     if (!sessionId) {
       throw new Error('No session ID found. Please upload a file first.');
     }
     
-    // Create a structure matching what the frontend expects
+    // In this implementation, we're using the sample_data saved in localStorage
+    // from the upload response since there's no direct preview endpoint
     return {
       columns: JSON.parse(localStorage.getItem('columnNames') || '[]'),
       data: JSON.parse(localStorage.getItem('sampleData') || '[]')
     };
   } catch (error) {
     console.error('Error getting data preview:', error);
+    handleApiError(error, 'Error getting data preview');
     throw error;
   }
 };
@@ -66,18 +82,22 @@ export const processData = async (option: string): Promise<any> => {
       missing_value_strategy: missingValueStrategy
     });
     
+    // Save visualizations data to localStorage
+    if (response.data.visualizations) {
+      updateVisualizationsStorage(response.data);
+    }
+    
     return response.data;
   } catch (error) {
     console.error('Error processing data:', error);
+    handleApiError(error, 'Error processing data');
     throw error;
   }
 };
 
-// Get data summary
+// Get data summary - This is a simplified version since there's no direct endpoint
 export const getDataSummary = async (): Promise<any> => {
   try {
-    // Since there's no direct endpoint for data summary in the backend,
-    // we'll use the data stored in localStorage from the upload response
     const sessionId = localStorage.getItem('sessionId');
     if (!sessionId) {
       throw new Error('No session ID found. Please upload a file first.');
@@ -85,7 +105,6 @@ export const getDataSummary = async (): Promise<any> => {
     
     const stats = JSON.parse(localStorage.getItem('stats') || '{}');
     
-    // Transform the data to match the frontend's expected format
     return {
       shape: { rows: stats.rows || 0, columns: stats.columns || 0 },
       missingValues: stats.missing_values || {},
@@ -95,6 +114,7 @@ export const getDataSummary = async (): Promise<any> => {
     };
   } catch (error) {
     console.error('Error getting data summary:', error);
+    handleApiError(error, 'Error getting data summary');
     throw error;
   }
 };
@@ -118,13 +138,19 @@ export const getVisualizations = async (): Promise<any> => {
     };
   } catch (error) {
     console.error('Error getting visualizations:', error);
+    handleApiError(error, 'Error getting visualizations');
     throw error;
   }
 };
 
 // Run regression
-export const runRegression = async (sessionId: string, targetVariable: string): Promise<any> => {
+export const runRegression = async (targetVariable: string): Promise<any> => {
   try {
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+      throw new Error('No session ID found. Please upload a file first.');
+    }
+    
     const response = await axios.post(`${API_BASE_URL}/run_regression`, {
       session_id: sessionId,
       target_variable: targetVariable
@@ -143,6 +169,7 @@ export const runRegression = async (sessionId: string, targetVariable: string): 
     };
   } catch (error) {
     console.error('Error running regression:', error);
+    handleApiError(error, 'Error running regression analysis');
     throw error;
   }
 };
@@ -158,54 +185,67 @@ export const downloadCleanedData = async (): Promise<void> => {
     window.open(`${API_BASE_URL}/download/${sessionId}?type=data`, '_blank');
   } catch (error) {
     console.error('Error downloading cleaned data:', error);
+    handleApiError(error, 'Error downloading cleaned data');
     throw error;
   }
 };
 
 // Download report
-export const downloadReport = async (sessionId: string): Promise<void> => {
+export const downloadReport = async (): Promise<void> => {
   try {
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+      throw new Error('No session ID found. Please upload a file first.');
+    }
+    
     window.open(`${API_BASE_URL}/generate_report/${sessionId}`, '_blank');
   } catch (error) {
     console.error('Error downloading report:', error);
+    handleApiError(error, 'Error downloading report');
     throw error;
   }
 };
 
 // Download results
-export const downloadResults = async (sessionId: string): Promise<void> => {
+export const downloadResults = async (): Promise<void> => {
   try {
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+      throw new Error('No session ID found. Please upload a file first.');
+    }
+    
     window.open(`${API_BASE_URL}/download/${sessionId}?type=results`, '_blank');
   } catch (error) {
     console.error('Error downloading results:', error);
+    handleApiError(error, 'Error downloading results');
     throw error;
   }
 };
 
-// Download visualization - not directly supported by backend
-export const downloadVisualization = async (visualizationType: string): Promise<void> => {
-  try {
-    const visualizations = JSON.parse(localStorage.getItem('visualizations') || '{}');
-    const base64Data = visualizations[visualizationType];
-    
-    if (!base64Data) {
-      throw new Error(`Visualization ${visualizationType} not found`);
+// Helper function to handle API errors
+const handleApiError = (error: any, defaultMessage: string) => {
+  let errorMessage = defaultMessage;
+  
+  if (axios.isAxiosError(error)) {
+    if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+      errorMessage = 'Cannot connect to the backend server. Please ensure the server is running.';
+    } else if (error.response) {
+      // Server responded with an error
+      const serverMessage = error.response.data?.error || error.response.data?.message;
+      if (serverMessage) {
+        errorMessage = `Server error: ${serverMessage}`;
+      } else {
+        errorMessage = `Server error (${error.response.status})`;
+      }
     }
-    
-    // Create a link to download the base64 image
-    const link = document.createElement('a');
-    link.href = `data:image/png;base64,${base64Data}`;
-    link.download = `${visualizationType}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (error) {
-    console.error('Error downloading visualization:', error);
-    throw error;
+  } else if (error instanceof Error) {
+    errorMessage = error.message;
   }
+  
+  toast.error(errorMessage);
 };
 
-// Update FileUpload.tsx to save session data to localStorage
+// Update localStorage with session data
 export const updateLocalStorage = (data: any) => {
   localStorage.setItem('sessionId', data.session_id);
   localStorage.setItem('stats', JSON.stringify(data.stats));
@@ -215,7 +255,7 @@ export const updateLocalStorage = (data: any) => {
   localStorage.setItem('categoricalFeatures', JSON.stringify(data.categorical_features));
 };
 
-// Update for after data processing to save visualizations
+// Update localStorage with visualizations data
 export const updateVisualizationsStorage = (data: any) => {
   localStorage.setItem('visualizations', JSON.stringify(data.visualizations));
 };

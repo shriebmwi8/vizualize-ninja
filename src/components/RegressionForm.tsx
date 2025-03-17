@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { TrendingUp } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
+import { toast } from 'sonner';
 
 interface RegressionFormProps {
   onRunRegression: (targetVariable: string) => void;
@@ -19,17 +20,38 @@ const RegressionForm: React.FC<RegressionFormProps> = ({
   availableFeatures = []
 }) => {
   const [targetVariable, setTargetVariable] = useState<string>('');
+  const [features, setFeatures] = useState<string[]>([]);
   
-  // Use provided features or fallback to default if empty
-  const features = availableFeatures.length > 0 
-    ? availableFeatures 
-    : ["Age", "Income", "Spending", "Savings", "Credit Score"];
+  useEffect(() => {
+    // Load numeric features from localStorage if they exist
+    const loadFeatures = () => {
+      try {
+        const storedFeatures = localStorage.getItem('numericFeatures');
+        if (storedFeatures) {
+          setFeatures(JSON.parse(storedFeatures));
+        } else if (availableFeatures.length > 0) {
+          setFeatures(availableFeatures);
+        } else {
+          // Fallback to default if no features are provided or stored
+          setFeatures(["Age", "Income", "Spending", "Savings", "Credit Score"]);
+        }
+      } catch (error) {
+        console.error('Error loading features:', error);
+        setFeatures(availableFeatures.length > 0 ? availableFeatures : 
+          ["Age", "Income", "Spending", "Savings", "Credit Score"]);
+      }
+    };
+    
+    loadFeatures();
+  }, [availableFeatures]);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (targetVariable) {
-      onRunRegression(targetVariable);
+    if (!targetVariable) {
+      toast.error('Please select a target variable');
+      return;
     }
+    onRunRegression(targetVariable);
   };
   
   return (
@@ -45,7 +67,7 @@ const RegressionForm: React.FC<RegressionFormProps> = ({
             <Select 
               value={targetVariable} 
               onValueChange={setTargetVariable}
-              disabled={isLoading}
+              disabled={isLoading || features.length === 0}
             >
               <SelectTrigger id="target-variable" className="w-full">
                 <SelectValue placeholder="Select a variable to predict" />

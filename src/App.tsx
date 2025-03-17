@@ -10,8 +10,16 @@ import DataExploration from "./pages/DataExploration";
 import Visualizations from "./pages/Visualizations";
 import RegressionAnalysis from "./pages/RegressionAnalysis";
 import NotFound from "./pages/NotFound";
+import ConnectionStatus from "./components/ConnectionStatus";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <BrowserRouter>
@@ -28,6 +36,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <ConnectionStatus />
       </TooltipProvider>
     </QueryClientProvider>
   </BrowserRouter>
