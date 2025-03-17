@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, BarChart3, Database } from 'lucide-react';
+import { Upload, BarChart3, Database, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
@@ -15,11 +15,11 @@ const Index = () => {
             VizNinja Data Explorer
           </h1>
           <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-            Transform your raw data into beautiful visualizations with just a few clicks.
-            Upload, clean, analyze, and visualize your data all in one place.
+            Transform your raw data into beautiful visualizations and predictive models with just a few clicks.
+            Upload, clean, analyze, and model your data all in one place.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             <div className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow">
               <div className="bg-vizNinja-lightPurple p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <Upload className="h-8 w-8 text-vizNinja-purple" />
@@ -47,6 +47,16 @@ const Index = () => {
               <h3 className="text-xl font-semibold mb-2">Visualize</h3>
               <p className="text-gray-500">
                 Generate insightful visualizations to discover patterns in your data.
+              </p>
+            </div>
+            
+            <div className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+              <div className="bg-green-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="h-8 w-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Predict</h3>
+              <p className="text-gray-500">
+                Build regression models to predict outcomes and identify key factors.
               </p>
             </div>
           </div>

@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Home from "./pages/Home";
 import DataExploration from "./pages/DataExploration";
 import Visualizations from "./pages/Visualizations";
+import RegressionAnalysis from "./pages/RegressionAnalysis";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/home" element={<Home />} />
           <Route path="/exploration" element={<DataExploration />} />
           <Route path="/visualizations" element={<Visualizations />} />
+          <Route path="/regression" element={<RegressionAnalysis />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
