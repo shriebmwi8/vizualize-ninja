@@ -1,34 +1,47 @@
 
 import React, { useState, useEffect } from 'react';
-import { Wifi, RefreshCw } from 'lucide-react';
+import { WifiOff, Wifi } from 'lucide-react';
 import { checkServerConnection } from '@/lib/api';
 import { toast } from 'sonner';
-import { Button } from './ui/button';
 
 const ConnectionStatus: React.FC = () => {
-  const [isChecking, setIsChecking] = useState<boolean>(false);
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
   
   const checkConnection = async () => {
-    setIsChecking(true);
     try {
-      await checkServerConnection();
+      const connected = await checkServerConnection();
+      setIsConnected(connected);
+      if (!connected) {
+        toast.error('Cannot connect to the backend server. Make sure it\'s running on http://localhost:5000 and has the proper API endpoints configured.');
+      }
     } catch (error) {
       console.error('Error checking connection:', error);
-    } finally {
-      setIsChecking(false);
+      setIsConnected(false);
     }
   };
   
   useEffect(() => {
     checkConnection();
+    
+    // Check connection periodically
+    const interval = setInterval(checkConnection, 30000);
+    return () => clearInterval(interval);
   }, []);
   
+  if (isConnected === null) {
+    return null; // Still checking
+  }
+  
   return (
-    <div className="fixed bottom-4 right-4 p-3 rounded-full bg-green-100 shadow-md z-50 flex items-center justify-center transition-all duration-300">
-      <Wifi className="h-5 w-5 text-green-600" />
-      <span className="text-xs ml-2 text-green-600 hidden md:inline">
-        Mock Backend (No server needed)
-      </span>
+    <div className={`fixed bottom-4 right-4 p-3 rounded-full ${isConnected ? 'bg-green-100' : 'bg-red-100'} shadow-md z-50 flex items-center justify-center transition-all duration-300`}>
+      {isConnected ? (
+        <Wifi className="h-5 w-5 text-green-600" />
+      ) : (
+        <div className="flex items-center">
+          <WifiOff className="h-5 w-5 text-red-600" />
+          <span className="text-xs ml-2 text-red-600 hidden md:inline">Backend not connected</span>
+        </div>
+      )}
     </div>
   );
 };
