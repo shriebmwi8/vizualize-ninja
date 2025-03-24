@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify, send_file
 import pandas as pd
 import numpy as np
@@ -15,7 +14,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn import metrics
 
 app = Flask(__name__)
-CORS(app)  # This will enable CORS for all routes
+# Configure CORS to allow requests from your frontend origin
+CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"], "supports_credentials": True}})
 
 # In-memory storage for session data
 sessions = {}
