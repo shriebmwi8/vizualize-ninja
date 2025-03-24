@@ -14,11 +14,27 @@ from sklearn.linear_model import LinearRegression
 from sklearn import metrics
 
 app = Flask(__name__)
-# Configure CORS to allow requests from your frontend origin
-CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"], "supports_credentials": True}})
+# Configure CORS to allow requests from your frontend origin and handle preflight requests
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    }
+})
 
 # In-memory storage for session data
 sessions = {}
+
+@app.after_request
+def after_request(response):
+    """Ensure proper CORS headers are set for all responses"""
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
