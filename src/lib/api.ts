@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -8,7 +7,9 @@ const API_BASE_URL = 'http://localhost:5000/api';
 // Check server connection
 export const checkServerConnection = async (): Promise<boolean> => {
   try {
+    console.log('Checking connection to:', `${API_BASE_URL}/health`);
     const response = await axios.get(`${API_BASE_URL}/health`, { timeout: 5000 });
+    console.log('Server response:', response);
     return response.status === 200;
   } catch (error) {
     console.error('Backend server connection failed:', error);
@@ -19,6 +20,7 @@ export const checkServerConnection = async (): Promise<boolean> => {
 // Upload file to backend
 export const uploadFile = async (file: File): Promise<any> => {
   try {
+    console.log('Uploading file to:', `${API_BASE_URL}/upload`);
     const formData = new FormData();
     formData.append('file', file);
     
@@ -152,6 +154,7 @@ export const runRegression = async (targetVariable: string): Promise<any> => {
       throw new Error('No session ID found. Please upload a file first.');
     }
     
+    console.log('Running regression for target:', targetVariable);
     const response = await axios.post(`${API_BASE_URL}/run_regression`, {
       session_id: sessionId,
       target_variable: targetVariable
@@ -260,7 +263,7 @@ const handleApiError = (error: any, defaultMessage: string) => {
   
   if (axios.isAxiosError(error)) {
     if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-      errorMessage = 'Cannot connect to the backend server. Please ensure the server is running.';
+      errorMessage = 'Cannot connect to the backend server. Please ensure the server is running on http://localhost:5000.';
     } else if (error.response) {
       // Server responded with an error
       const serverMessage = error.response.data?.error || error.response.data?.message;

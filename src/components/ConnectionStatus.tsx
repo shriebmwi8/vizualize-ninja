@@ -6,17 +6,20 @@ import { toast } from 'sonner';
 
 const ConnectionStatus: React.FC = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   
   const checkConnection = async () => {
     try {
       const connected = await checkServerConnection();
       setIsConnected(connected);
+      setConnectionError(null);
       if (!connected) {
         toast.error('Cannot connect to the backend server. Make sure it\'s running on http://localhost:5000 and has the proper API endpoints configured.');
       }
     } catch (error) {
       console.error('Error checking connection:', error);
       setIsConnected(false);
+      setConnectionError(error instanceof Error ? error.message : 'Unknown error');
     }
   };
   
@@ -39,7 +42,10 @@ const ConnectionStatus: React.FC = () => {
       ) : (
         <div className="flex items-center">
           <WifiOff className="h-5 w-5 text-red-600" />
-          <span className="text-xs ml-2 text-red-600 hidden md:inline">Backend not connected</span>
+          <span className="text-xs ml-2 text-red-600 hidden md:inline">
+            Backend not connected
+            {connectionError && <span className="block text-xs opacity-75">{connectionError}</span>}
+          </span>
         </div>
       )}
     </div>
